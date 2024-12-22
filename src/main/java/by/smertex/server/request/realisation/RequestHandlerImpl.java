@@ -1,7 +1,6 @@
 package by.smertex.server.request.realisation;
 
-import by.smertex.server.exception.ClientResponseException;
-import by.smertex.server.exception.ClientSocketCloseException;
+import by.smertex.server.exception.ClientSocketException;
 import by.smertex.server.util.PropertiesManager;
 
 import java.io.IOException;
@@ -27,7 +26,7 @@ public class RequestHandlerImpl implements Runnable {
         Exception exception = new Exception();
         try {
             while (socketChannel.isOpen()) {
-                echoResponse(exception);
+                echoResponse();
             }
         } catch (IOException e) {
             exception.addSuppressed(e);
@@ -36,12 +35,12 @@ public class RequestHandlerImpl implements Runnable {
                 socketChannel.close();
             } catch (IOException e) {
                 exception.addSuppressed(e);
-                throw new ClientSocketCloseException(exception.getMessage());
+                throw new ClientSocketException(exception.getMessage());
             }
         }
     }
 
-    private void echoResponse(Exception exception) throws IOException {
+    private void echoResponse() throws IOException {
         while (socketChannel.read(buffer) > 0){
             System.out.println(new String(buffer.array()));
             buffer.flip();
