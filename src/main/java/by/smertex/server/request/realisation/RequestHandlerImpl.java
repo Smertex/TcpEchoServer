@@ -23,6 +23,7 @@ public class RequestHandlerImpl implements Runnable, RequestHandler {
     }
 
     @Override
+    @SuppressWarnings("all")
     public void run() {
         try {
             while (socketChannel.isOpen()) {
