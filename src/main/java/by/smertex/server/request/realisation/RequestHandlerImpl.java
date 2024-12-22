@@ -2,14 +2,13 @@ package by.smertex.server.request.realisation;
 
 import by.smertex.server.exception.ClientResponseException;
 import by.smertex.server.exception.ClientSocketCloseException;
-import by.smertex.server.request.interfaces.RequestHandler;
 import by.smertex.server.util.PropertiesManager;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
-public class RequestHandlerImpl implements Runnable, RequestHandler {
+public class RequestHandlerImpl implements Runnable {
 
     private static final String BUFFER_SIZE_KEY = "handler.buffer.size";
 
@@ -25,29 +24,28 @@ public class RequestHandlerImpl implements Runnable, RequestHandler {
     @Override
     @SuppressWarnings("all")
     public void run() {
+        Exception exception = new Exception();
         try {
             while (socketChannel.isOpen()) {
-                echoResponse();
+                echoResponse(exception);
             }
+        } catch (IOException e) {
+            exception.addSuppressed(e);
         } finally {
             try {
                 socketChannel.close();
             } catch (IOException e) {
-                throw new ClientSocketCloseException(e.getMessage());
+                exception.addSuppressed(e);
+                throw new ClientSocketCloseException(exception.getMessage());
             }
         }
     }
 
-    @Override
-    public void echoResponse() {
-        try {
-            while (socketChannel.read(buffer) > 0){
-                System.out.println(new String(buffer.array()));
-                buffer.flip();
-                socketChannel.write(buffer);
-            }
-        } catch (IOException e) {
-            throw new ClientResponseException(e.getMessage());
+    private void echoResponse(Exception exception) throws IOException {
+        while (socketChannel.read(buffer) > 0){
+            System.out.println(new String(buffer.array()));
+            buffer.flip();
+            socketChannel.write(buffer);
         }
     }
 }
