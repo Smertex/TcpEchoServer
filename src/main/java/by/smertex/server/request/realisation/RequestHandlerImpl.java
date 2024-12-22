@@ -30,6 +30,7 @@ public class RequestHandlerImpl implements Runnable {
             }
         } catch (IOException e) {
             exception.addSuppressed(e);
+            throw new ClientSocketException(e.getMessage());
         } finally {
             try {
                 socketChannel.close();
